@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: SAM Template for Loom features
+
+Parameters:
+  InputBucketName:
+    Type: String
+    Default: loom-input-videos
+
+Globals:
+  Function:
+    Runtime: python3.7
+    MemorySize: 512
+    Timeout: 180
+    Handler: __init__.handle
+    Environment:
+      Variables:
+        INPUT_BUCKET: !Ref InputBucketName
+        OUTPUT_BUCKET: !Ref OutputBucketName
+Resources:
+  InputBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: loom-input-videos
+  OutputBucketName:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: loom-transcriptions
+  TranscribeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: transcribe-function
+      CodeUri: ./lambdas/transcribe
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref InputBucketName
+        - S3CrudPolicy:
+            BucketName: !Ref OutputBucketName
+        - Statement:
+          - Sid: TranscribeVideoPolicy
+            Effect: Allow
+            Action:
+              - transcribe:*
+            Resource: '*'
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref InputBucket
+            Events: s3:ObjectCreated:*

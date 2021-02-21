@@ -1,0 +1,16 @@
+{
+  "name": "loom-features",
+  "version": "1.0.0",
+  "description": "`sam deploy`",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-api": "sam local start-api --host localhost --port 8081 --template template-d.yml",
+    "local": "sam build $npm_config_func --use-container && sam local invoke $npm_config_func",
+    "build": "sam build --use-container",
+    "deploy": "sam build --use-container && sam package --template-file .aws-sam/build/template.yaml --s3-bucket deploy-tmp && sam deploy --stack-name loom-features-app --s3-bucket deploy-tmp"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
